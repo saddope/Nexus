@@ -10,7 +10,7 @@
 ## 1️⃣ Установка необходимых зависимостей
 ```bash
 sudo apt update && sudo apt upgrade -y
-sudo apt install -y git curl pkg-config libssl-dev protobuf-compiler
+sudo apt install -y git curl pkg-config libssl-dev protobuf-compiler build-essential
 ```
 
 ## 2️⃣ Установка Rust
