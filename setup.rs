@@ -37,7 +37,7 @@ pub async fn run_initial_setup() -> SetupResult {
         ProjectDirs::from("xyz", "nexus", "cli").expect("Failed to determine config directory");
     let config_path = proj_dirs.config_dir().join("user.json");
 
-    // Cek apakah ada konfigurasi yang sudah tersimpan
+    // Проверяем, существует ли уже сохраненная конфигурация
     if config_path.exists() {
         println!("\nThis node is already connected to an account");
 
@@ -59,7 +59,7 @@ pub async fn run_initial_setup() -> SetupResult {
         }
     }
 
-    // Gunakan node_id yang sudah ditentukan tanpa meminta input pengguna
+    // Используем заранее заданный Node ID без запроса у пользователя
     let node_id = "NODE_ID_MU".to_string();
     println!("Using predefined node ID: {}", node_id);
 
