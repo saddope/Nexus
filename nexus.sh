@@ -2,9 +2,17 @@
 
 set -e
 
-# мой тг
-echo -e "\033[0;35m"
-cat << "EOF"
+# Цвета для логов
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+CYAN='\033[0;36m'
+NC='\033[0m'
+
+# Логотип и информация о Telegram
+show_logo() {
+    echo -e "\033[0;35m"
+    cat << "EOF"
 
  _____                   _                      _    _             
 (____ \                 | |                    | |  | |            
@@ -17,21 +25,10 @@ cat << "EOF"
 Telegram Channel: t.me/saddopecrypto
 Telegram Profile: @saddope1
 
-
 EOF
-echo -e "\033[0m"
+    echo -e "\033[0m"
+}
 
-echo -e "\033[0;36m>>> Starting Nexus Auto-Installer...\033[0m"
-sleep 2
-
-# Цвета для логов
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-CYAN='\033[0;36m'
-NC='\033[0m'
-
-# Функция логирования
 log() {
     local level=$1
     local message=$2
@@ -51,25 +48,16 @@ if [[ $EUID -ne 0 ]]; then
     exit 1
 fi
 
-# Функция загрузочного индикатора
-progress_bar() {
-    local duration=$1
-    local message=$2
-    local chars="/—\\|"
-    
-    echo -n -e "${YELLOW}${message}...${NC} "
-    for ((i = 0; i < duration; i++)); do
-        printf "\b${chars:i%${#chars}:1}"
-        sleep 0.1
-    done
-    printf "\r${GREEN}✔ Done!${NC} \n"
-}
+show_logo
+
+echo -e "\033[0;36m>>> Starting Nexus Auto-Installer...\033[0m"
+sleep 2
 
 log "INFO" "Обновление системы..."
 sudo apt update && sudo apt upgrade -y
 
 log "INFO" "Установка зависимостей..."
-sudo apt install -y build-essential pkg-config libssl-dev git unzip
+sudo apt install -y build-essential pkg-config libssl-dev git unzip screen
 
 # Установка Rust
 if ! command -v rustc &> /dev/null; then
@@ -98,6 +86,19 @@ rustup update
 rustup target add riscv32i-unknown-none-elf
 rustup component add rust-src
 cargo install cargo-zigbuild
+
+# Настройка swap (16GB)
+log "INFO" "Настройка swap (16GB)..."
+sudo swapoff -a
+sudo fallocate -l 16G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+
+log "INFO" "Настройка overcommit memory"
+sudo sysctl -w vm.overcommit_memory=1
+
+echo 'vm.overcommit_memory=1' | sudo tee -a /etc/sysctl.conf
 
 # Установка Nexus CLI в screen-сессии
 log "INFO" "Запуск установки Nexus в screen-сессии..."
